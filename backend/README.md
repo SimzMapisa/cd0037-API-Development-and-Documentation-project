@@ -27,7 +27,7 @@ pip install -r requirements.txt
 With Postgres running, create a `trivia` database:
 
 ```bash
-createbd trivia
+createdb trivia
 ```
 
 Populate the database using the `trivia.psql` file provided. From the `backend` folder in terminal run:
@@ -81,12 +81,12 @@ You will need to provide detailed documentation of your API endpoints including 
 
 ```json
 {
-  "1": "Science",
-  "2": "Art",
-  "3": "Geography",
-  "4": "History",
-  "5": "Entertainment",
-  "6": "Sports"
+	"1": "Science",
+	"2": "Art",
+	"3": "Geography",
+	"4": "History",
+	"5": "Entertainment",
+	"6": "Sports"
 }
 ```
 
