@@ -52,7 +52,7 @@ def create_app(test_config=None):
         categories = Category.query.all()
         categories_dict = {}
         if categories is None:
-            abort(404)
+            return not_found(404)
 
         for category in categories:
             categories_dict[category.id] = category.type
@@ -80,7 +80,7 @@ def create_app(test_config=None):
         categories = Category.query.all()
         categories_dict = {}
         if categories is None:
-            abort(404)
+            return not_found(404)
         for category in categories:
             categories_dict[category.id] = category.type
         return jsonify({
@@ -105,7 +105,7 @@ def create_app(test_config=None):
             question = Question.query.filter(
                 Question.id == question_id).one_or_none()
             if question is None:
-                abort(404)
+                return not_found(404)
             question.delete()
             selection = Question.query.order_by(Question.id).all()
             current_questions = paginate_questions(request, selection)
@@ -118,7 +118,7 @@ def create_app(test_config=None):
                 'total_questions': len(Question.query.all())
             })
         except:
-            abort(422)
+            return unprocessable(422)
 
     """
     @TODO:
@@ -152,7 +152,7 @@ def create_app(test_config=None):
                 'total_questions': len(Question.query.all())
             })
         except:
-            abort(422)
+            return unprocessable(422)
 
     """
     @TODO:
@@ -174,7 +174,7 @@ def create_app(test_config=None):
         categories = Category.query.all()
         categories_dict = {}
         if categories is None:
-            abort(404)
+            return not_found(404)
         for category in categories:
             categories_dict[category.id] = category.type
         return jsonify({
@@ -202,7 +202,7 @@ def create_app(test_config=None):
         categories = Category.query.all()
         categories_dict = {}
         if categories is None:
-            abort(404)
+            return not_found(404)
         for category in categories:
             categories_dict[category.id] = category.type
         return jsonify({
@@ -227,16 +227,20 @@ def create_app(test_config=None):
     @app.route('/quizzes', methods=['POST'])
     def play_quiz():
         body = request.get_json()
-        previous_questions = body.get('previous_questions', None)
-        quiz_category = body.get('quiz_category', None)
+
+        if not ('quiz_category' in body and 'previous_questions' in body):
+            return unprocessable(422)
+
+        previous_questions = body.get('previous_questions')
+        quiz_category = body.get('quiz_category')
 
         if quiz_category['id'] == 0:
             selection = Question.query.filter(
-                Question.id.not_in(previous_questions)).all()
+                Question.id.notin_(previous_questions)).all()
         else:
             selection = Question.query.filter(
                 Question.category == quiz_category['id'],
-                Question.id.not_in(previous_questions)).all()
+                Question.id.notin_(previous_questions)).all()
         if len(selection) == 0:
             return jsonify({
                 'success': True,
@@ -255,5 +259,36 @@ def create_app(test_config=None):
     Create error handlers for all expected errors
     including 404 and 422.
     """
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({
+            "success": False,
+            "error": 404,
+            "message": "Resource not found"
+        }), 404
+
+    @app.errorhandler(422)
+    def unprocessable(error):
+        return jsonify({
+            "success": False,
+            "error": 422,
+            "message": "Querry can not be processed check your infomation and try again"
+        }), 422
+
+    @app.errorhandler(400)
+    def bad_request(error):
+        return jsonify({
+            "success": False,
+            "error": 400,
+            "message": "Bad request"
+        }), 400
+
+    @app.errorhandler(405)
+    def forbidden(error):
+        return jsonify({
+            "success": False,
+            "error": 405,
+            "message": "Method not allowed"
+        }), 405
 
     return app
