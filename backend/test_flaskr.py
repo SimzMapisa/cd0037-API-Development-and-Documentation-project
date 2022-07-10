@@ -107,6 +107,67 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data["success"], False)
         self.assertEqual(data["message"], "unprocessable")
 
+    def test_create_question_with_no_category(self):
+        res = self.client().post("/api/v1/questions",
+                                 json={"question": "Which language is best for machine learning?", "answer": "Python", "difficulty": "4"})
+
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "unprocessable")
+
+    def test_create_question_with_no_difficulty(self):
+        res = self.client().post("/api/v1/questions",
+                                 json={"question": "Which language is best for machine learning?", "answer": "Python", "category": "5"})
+
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "unprocessable")
+
+    def test_delete_question_with_no_id(self):
+        res = self.client().delete("/api/v1/questions/")
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "resource not found")
+
+    def test_delete_question_with_invalid_id(self):
+        res = self.client().delete("/api/v1/questions/100")
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "resource not found")
+
+    def test_questions_search_without_search_term(self):
+        res = self.client().post("/api/v1/questions/search")
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "bad request")
+
+    def test_404_get_questions_per_category(self):
+        res = self.client().get("/api/v1/categories/100/questions")
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "resource not found")
+
+    def test_play_quiz_failure(self):
+        res = self.client().post("/api/v1/quizzes",
+                                 json={"quiz_category": "10"})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "unprocessable")
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
