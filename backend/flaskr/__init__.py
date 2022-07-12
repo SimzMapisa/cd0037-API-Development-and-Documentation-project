@@ -51,24 +51,24 @@ def create_app(test_config=None):
     """
     @app.route('/api/v1/categories')
     def retrieve_categories():
+        # `GET '/api/v1/categories'`
 
-        # - Method Get
-        # - Endpoint - /api/v1/categories
         # - Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
         # - Request Arguments: None
         # - Returns: An object with a single key, `categories`, that contains an object of `id: category_string` key: value pairs.
-        ###Sample result##
-        # {
-        #     "categories": {
-        #         "1": "Science",
-        #         "2": "Art",
-        #         "3": "Geography",
-        #         "4": "History",
-        #         "5": "Entertainment",
-        #         "6": "Sports"
-        #     },
-        #     "success": true,
-        # }
+        '''json
+        {
+            "categories": {
+                "1": "Science",
+                "2": "Art",
+                "3": "Geography",
+                "4": "History",
+                "5": "Entertainment",
+                "6": "Sports"
+            },
+            "success": true
+        }
+        '''
 
         categories = Category.query.all()
         categories_dict = {}
@@ -99,34 +99,35 @@ def create_app(test_config=None):
     @app.route('/api/v1/questions', methods=['GET'])
     def retrieve_questions():
 
-        # - Method Get
-        # - Endpoint - /api/v1/questions
-        # - Fetches a dictionary of categories and a list of questions
+        # `GET '/api/v1/questions'`
+
+        # - Fetches a list of dictionaries of questions, answers, category_ids and a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
         # - Request Arguments: None
-        # - Both the dictionary of categories and the list of questions have key value pairs with the id as the key and the string value as the value
-        ###Sample result##
-        # {
-        #     "categories": {
-        #         "1": "Science",
-        #         "2": "Art",
-        #         "3": "Geography",
-        #         "4": "History",
-        #         "5": "Entertainment",
-        #         "6": "Sports"
-        #     },
-        #     "current_category": null,
-        #     "questions": [
-        #             {
-        #                 "answer": "Apollo 13",
-        #                 "category": 5,
-        #                 "difficulty": 4,
-        #                 "id": 2,
-        #                 "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
-        #             }
-        #         ],
-        #   "success": true,
-        #   "total_questions": 21
-        # }
+        # - Returns: An object with three keys, `categories`, `current_category` and  `questions`, that contains an object of `id: category_string` key: value pairs, `current_category` and `questions list of categories``.
+        '''json
+        {
+            "categories": {
+                "1": "Science",
+                "2": "Art",
+                "3": "Geography",
+                "4": "History",
+                "5": "Entertainment",
+                "6": "Sports"
+            },
+            "current_category": null,
+            "questions": [
+                {
+                    "answer": "Edward Scissorhands",
+                    "category": 5,
+                    "difficulty": 3,
+                    "id": 6,
+                    "question": "What was the title of the 1990 fantasy directed by Tim Burton about a young man with multi-bladed appendages?"
+                }
+                ],
+                "success": true
+                "total_questions": 17
+        }
+        '''
 
         selection = Question.query.order_by(Question.id).all()
         current_questions = paginate_questions(request, selection)
@@ -165,28 +166,29 @@ def create_app(test_config=None):
     @app.route('/api/v1/questions/<int:question_id>', methods=['DELETE'])
     def delete_question(question_id):
 
-        # - Method Delete
-        # - Returns status code 200
-        # - Endpoint - /api/v1/questions/<int:question_id>
-        # - Fetches a question by id and deletes it
+        # `DELETE '/api/v1/questions/<int:question_id>'`
+
+        # - Delete the question from the database
         # - Request Arguments: None
-        # - Returns a success message indicating a successful deletion, updates the number of questions and returns the list of questions
-        ###Sample result##
-        # {
-        #     "deleted": 18,
-        #     "message": "Question deleted successfully.",
-        #     "questions": [
-        #         {
-        #             "answer": "Apollo 13",
-        #             "category": 5,
-        #             "difficulty": 4,
-        #             "id": 2,
-        #             "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
-        #         }
-        #     ],
-        #     "success": True
-        #     "total_questions": 20
-        # }
+        # - Returns: An object with with a key of deleted and a value of the deleted question_id, and a key of message with the successfull deletion and updates the list of questions otherwise it will error 404 if the question_id is not found
+        '''json
+        {
+            "deleted": 20,
+            "message": "Question deleted successfully.",
+            "questions": [
+                {
+                    "answer": "Edward Scissorhands",
+                    "category": 5,
+                    "difficulty": 3,
+                    "id": 6,
+                    "question": "What was the title of the 1990 fantasy directed by Tim Burton about a young man with multi-bladed appendages?"
+                }
+                ],
+                "status_code": 200,
+                "success": true,
+                "total_questions": 15
+        }
+        '''
 
         try:
             question = Question.query.filter(
@@ -221,12 +223,24 @@ def create_app(test_config=None):
     @app.route('/api/v1/questions', methods=['POST'])
     def create_question():
 
-        # - Method POST
-        # - Returns status code 200
-        # - Endpoint - /api/v1/questions
-        # - Creates a new question, and answer then update the total_questions
-        # - Request Arguments: CONTENT_TYPE : application/json
-        # - Returns a success message indicating a successful question creation
+        # `POST '/api/v1/questions'`
+
+        # - Creates a new question and save it to the database
+        # - Request Arguments: none
+        # - Returns: An object with a single key, `categories`, that contains an object of `id: category_string` key: value pairs.
+        '''json
+        {
+            "categories": {
+                "1": "Science",
+                "2": "Art",
+                "3": "Geography",
+                "4": "History",
+                "5": "Entertainment",
+                "6": "Sports"
+            },
+            "success": true
+        }
+        '''
 
         body = request.get_json()
         new_question = body.get('question', None)
@@ -266,12 +280,11 @@ def create_app(test_config=None):
     @app.route('/api/v1/questions/search', methods=['POST'])
     def search_questions():
 
-        # - Method POST
-        # - Returns status code 200
-        # - Endpoint - /api/v1/questions/search
-        # - Queries the database searching for questions based on search term
+        # `GET '/api/v1/questions/search'`
+
+        # - Queries the database searching for a question based on the search term.
         # - Request Arguments: None
-        # - Returns returns questions that match the search term
+        # - Returns: Returns a list of questions that matches the search term.
 
         body = request.get_json()
         search_term = body.get('searchTerm', None)
@@ -313,12 +326,35 @@ def create_app(test_config=None):
     @app.route('/api/v1/categories/<int:category_id>/questions')
     def retrieve_questions_by_category(category_id):
 
-        # - Method GET
-        # - Returns status code 200
-        # - Endpoint - /api/v1/categories/<int:category_id>/questions
-        # - Fetches a question based on the category_id
-        # - Request Arguments: None
-        # - Returns all questions associated with the returned category
+        # `POST '/api/v1/categories/<int:category_id>/questions'`
+
+        # - Gets questions based on category_id
+        # - Request Arguments: none
+        # - Returns: A list of questions in the specified category.
+        '''json
+        {
+            "categories": {
+                "1": "Science",
+                "2": "Art",
+                "3": "Geography",
+                "4": "History",
+                "5": "Entertainment",
+                "6": "Sports"
+            },
+            "current_category": 5,
+            "questions": [
+                {
+                    "answer": "Edward Scissorhands",
+                    "category": 5,
+                    "difficulty": 3,
+                    "id": 6,
+                    "question": "What was the title of the 1990 fantasy directed by Tim Burton about a young man with multi-bladed appendages?"
+                }
+            ],
+            "success": true,
+            "total_questions": 12
+        }
+        '''
 
         selection = Question.query.filter(
             Question.category == category_id).all()
@@ -356,12 +392,11 @@ def create_app(test_config=None):
     @app.route('/api/v1/quizzes', methods=['POST'])
     def play_quiz():
 
-        # - Method POST
-        # - Returns status code 200
-        # - Endpoint - /api/v1/quizzes
-        # - Randomly selects a question from the database
+        # `GET '/api/v1/questions'`
+
+        # - Fetches one question at a time from selected category or all questions
         # - Request Arguments: None
-        # - Returns one question at a time, the user is allowed to answer
+        # - Returns:One question at a time is displayed, the user is allowed to answer
 
         body = request.get_json()
 
